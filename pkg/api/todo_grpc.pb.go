@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type TodoClient interface {
 	Add(ctx context.Context, in *AddToDoRequest, opts ...grpc.CallOption) (*AddToDoResponse, error)
 	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (Todo_ListClient, error)
+	Delete(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*ResultBoolResponse, error)
+	Done(ctx context.Context, in *DoneToDoRequest, opts ...grpc.CallOption) (*ResultBoolResponse, error)
 }
 
 type todoClient struct {
@@ -75,12 +77,32 @@ func (x *todoListClient) Recv() (*ToDoItem, error) {
 	return m, nil
 }
 
+func (c *todoClient) Delete(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*ResultBoolResponse, error) {
+	out := new(ResultBoolResponse)
+	err := c.cc.Invoke(ctx, "/api.todo/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoClient) Done(ctx context.Context, in *DoneToDoRequest, opts ...grpc.CallOption) (*ResultBoolResponse, error) {
+	out := new(ResultBoolResponse)
+	err := c.cc.Invoke(ctx, "/api.todo/Done", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TodoServer is the server API for Todo service.
 // All implementations must embed UnimplementedTodoServer
 // for forward compatibility
 type TodoServer interface {
 	Add(context.Context, *AddToDoRequest) (*AddToDoResponse, error)
 	List(*EmptyMessage, Todo_ListServer) error
+	Delete(context.Context, *IdRequest) (*ResultBoolResponse, error)
+	Done(context.Context, *DoneToDoRequest) (*ResultBoolResponse, error)
 	mustEmbedUnimplementedTodoServer()
 }
 
@@ -93,6 +115,12 @@ func (UnimplementedTodoServer) Add(context.Context, *AddToDoRequest) (*AddToDoRe
 }
 func (UnimplementedTodoServer) List(*EmptyMessage, Todo_ListServer) error {
 	return status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedTodoServer) Delete(context.Context, *IdRequest) (*ResultBoolResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedTodoServer) Done(context.Context, *DoneToDoRequest) (*ResultBoolResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Done not implemented")
 }
 func (UnimplementedTodoServer) mustEmbedUnimplementedTodoServer() {}
 
@@ -146,6 +174,42 @@ func (x *todoListServer) Send(m *ToDoItem) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Todo_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.todo/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoServer).Delete(ctx, req.(*IdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Todo_Done_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DoneToDoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoServer).Done(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.todo/Done",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoServer).Done(ctx, req.(*DoneToDoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Todo_ServiceDesc is the grpc.ServiceDesc for Todo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +220,14 @@ var Todo_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Add",
 			Handler:    _Todo_Add_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _Todo_Delete_Handler,
+		},
+		{
+			MethodName: "Done",
+			Handler:    _Todo_Done_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

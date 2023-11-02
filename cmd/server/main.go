@@ -56,6 +56,17 @@ func (serv *server) List(in *pb.EmptyMessage, stream pb.Todo_ListServer) error {
 	return nil
 }
 
+func (serv *server) Delete(ctx context.Context, in *pb.IdRequest) (*pb.ResultBoolResponse, error) {
+	_, err := Repo.DeleteItemById(in.GetId())
+	if err != nil {
+		fmt.Println("couldn't delete item ", in)
+
+		return &pb.ResultBoolResponse{Success: false}, err
+	}
+
+	return &pb.ResultBoolResponse{Success: true}, nil
+}
+
 const (
 	ServerAddr = "localhost:8091"
 )

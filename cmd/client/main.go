@@ -30,7 +30,7 @@ func main() {
 	http.HandleFunc("/add", addHandler)
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/submit", submitHandler)
-	http.HandleFunc("/delete", deleteHandler)
+	http.HandleFunc("/delete/", deleteHandler)
 	http.HandleFunc("/done", doneHandler)
 
 	fmt.Println("gRPC connection starting")
@@ -98,22 +98,6 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	//var Items []models.ToDo
-	//
-	//Items = append(Items, models.ToDo{
-	//	Id:     1,
-	//	Title:  "Встать",
-	//	IsDone: true,
-	//	Order:  1,
-	//})
-	//
-	//Items = append(Items, models.ToDo{
-	//	Id:     1,
-	//	Title:  "Умыться",
-	//	IsDone: false,
-	//	Order:  1,
-	//})
-
 	p := make(map[string]interface{})
 	p["Items"] = Items
 
@@ -153,7 +137,29 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	//title := r.URL.Path[len("/view/"):]
 }
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Path[len("/delete/"):]
 
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		w.Write([]byte("Can't convert " + id + " to str"))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := gRPCClient.Delete(ctx, &pb.IdRequest{
+		Id: int64(idInt),
+	})
+	if err != nil {
+		log.Fatalf("could not delete: %v", err)
+	}
+
+	if response.GetSuccess() != true {
+		w.Write([]byte("failed to delete " + id))
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte("item deleted " + id))
+	w.Write([]byte("<br/><a href='/list'>list</a>"))
 }
 
 func doneHandler(w http.ResponseWriter, r *http.Request) {

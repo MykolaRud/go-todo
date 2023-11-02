@@ -7,6 +7,8 @@ option go_package = "./api";
 service todo {
   rpc Add(AddToDoRequest) returns (AddToDoResponse) {}
   rpc List(EmptyMessage) returns (stream ToDoItem) {}
+  rpc Delete(IdRequest) returns (ResultBoolResponse) {}
+  rpc Done(DoneToDoRequest) returns (ResultBoolResponse) {}
 }
 
 message AddToDoRequest {
@@ -26,6 +28,19 @@ message ToDoItem {
     string title = 2;
     int64 order = 3;
     bool done = 4;
+}
+
+message IdRequest {
+    int64 id = 1;
+}
+
+message ResultBoolResponse {
+    bool success = 1;
+}
+
+message DoneToDoRequest {
+    int64 id = 1;
+    bool done = 2;
 }
 
 //protoc -I api/proto/ --go_out=pkg/ api/proto/todo.proto
