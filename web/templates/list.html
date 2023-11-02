@@ -3,17 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>LIST OF TODOs</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 </head>
 <body>
     <h1>My ToDos</h1>
     <ul>
         {{range .Items}}
             <li>
-                <input type="checkbox" value="1" name="done[]" {{ if .Done }}checked{{ end }} readonly>
-                <a href="/done/{{ .Id }}">Done</a> {{ .Title }} <a href="/delete/{{ .Id }}">Delete</a></li>
+                <input type="checkbox" data-id="{{ .Id }}" value="1" name="done[]" {{ if .Done }}checked{{ end }} onclick="toggleDone(this);">
+                {{ .Title }} <a href="/delete/{{ .Id }}">Delete</a></li>
         {{end}}
     </ul>
 
     <a href="/add">Add more</a>
+
+    <script>
+        function toggleDone(el) {
+            var id = $(el).data('id')
+            var checked = $(el).is(":checked")
+
+            document.location.href = "/toggle/" + id + "/" + (checked ? 1 : 0)
+        }
+    </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	pb "todoserver/pkg/api"
 )
@@ -31,7 +32,7 @@ func main() {
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/submit", submitHandler)
 	http.HandleFunc("/delete/", deleteHandler)
-	http.HandleFunc("/done", doneHandler)
+	http.HandleFunc("/toggle/", toggleHandler)
 
 	fmt.Println("gRPC connection starting")
 	initGRPCClient()
@@ -162,6 +163,8 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("<br/><a href='/list'>list</a>"))
 }
 
-func doneHandler(w http.ResponseWriter, r *http.Request) {
+func toggleHandler(w http.ResponseWriter, r *http.Request) {
+	urlSegments := strings.Split(r.URL.Path, "/")
 
+	fmt.Println(urlSegments)
 }
