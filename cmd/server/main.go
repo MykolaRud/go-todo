@@ -56,6 +56,21 @@ func (serv *server) List(in *pb.EmptyMessage, stream pb.Todo_ListServer) error {
 	return nil
 }
 
+func (serv *server) Done(ctx context.Context, in *pb.DoneToDoRequest) (*pb.ResultBoolResponse, error) {
+
+	id := in.GetId()
+	done := in.GetDone()
+
+	_, err := Repo.SetItemDoneById(int64(id), done)
+	if err != nil {
+		log.Fatal("failed to toggle item ", id)
+
+		return &pb.ResultBoolResponse{Success: false}, err
+	}
+
+	return &pb.ResultBoolResponse{Success: true}, nil
+}
+
 func (serv *server) Delete(ctx context.Context, in *pb.IdRequest) (*pb.ResultBoolResponse, error) {
 	_, err := Repo.DeleteItemById(in.GetId())
 	if err != nil {

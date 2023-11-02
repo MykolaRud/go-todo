@@ -64,8 +64,9 @@ func (repository *ToDoRepository) DeleteItemById(id int64) (sql.Result, error) {
 	return Result, err
 }
 
-func (repository *ToDoRepository) SetItemDoneById(id int64) (sql.Result, error) {
-	Result, err := repository.Execute("UPDATE todos SET is_done = 1 WHERE id = ?",
+func (repository *ToDoRepository) SetItemDoneById(id int64, done bool) (sql.Result, error) {
+	Result, err := repository.Execute("UPDATE todos SET is_done = ? WHERE id = ?",
+		done,
 		id,
 	)
 

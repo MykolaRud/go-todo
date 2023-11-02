@@ -166,5 +166,34 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 func toggleHandler(w http.ResponseWriter, r *http.Request) {
 	urlSegments := strings.Split(r.URL.Path, "/")
 
-	fmt.Println(urlSegments)
+	if len(urlSegments) < 3 {
+		log.Fatal("not enough arguments")
+
+		return
+	}
+
+	id := urlSegments[2]
+	done := urlSegments[3]
+
+	idInt, _ := strconv.Atoi(id)
+	doneBool := done == "1"
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := gRPCClient.Done(ctx, &pb.DoneToDoRequest{
+		Id:   int64(idInt),
+		Done: doneBool,
+	})
+	if err != nil {
+		log.Fatalf("could not delete: %v", err)
+	}
+
+	if !response.GetSuccess() {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte("couldn't toggle " + id))
+		w.Write([]byte("<br/><a href='/list'>list</a>"))
+		return
+	}
+
+	http.Redirect(w, r, "/list", http.StatusSeeOther)
 }
