@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIST OF TODOs</title>
+</head>
+<body>
+    <h1>My ToDos</h1>
+    <ul>
+        {{range .Items}}
+            <li>
+                <input type="checkbox" value="1" name="done[]" {{ if .Done }}checked{{ end }} readonly>
+                <a href="/done/{{ .Id }}">Done</a> {{ .Title }} <a href="/delete/{{ .Id }}">Delete</a></li>
+        {{end}}
+    </ul>
+
+    <a href="/add">Add more</a>
+</body>
+</html>

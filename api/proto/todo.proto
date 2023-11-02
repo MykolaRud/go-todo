@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./api";
+
+service todo {
+  rpc Add(AddToDoRequest) returns (AddToDoResponse) {}
+  rpc List(EmptyMessage) returns (stream ToDoItem) {}
+}
+
+message AddToDoRequest {
+    string title = 1;
+    int64 order = 2;
+    bool done = 3;
+}
+
+message AddToDoResponse {
+    int32 id = 1;
+}
+
+message EmptyMessage {}
+
+message ToDoItem {
+    int64 id = 1;
+    string title = 2;
+    int64 order = 3;
+    bool done = 4;
+}
+
+//protoc -I api/proto/ --go_out=pkg/ api/proto/todo.proto
+// protoc --go_out=pkg/ --go-grpc_out=pkg/ api/proto/todo.proto
